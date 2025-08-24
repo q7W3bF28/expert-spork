@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画图片转PDF工具 - 专业版</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1><i class="fas fa-book-open"></i> 漫画图片转PDF工具</h1>
+                <p class="subtitle">专为漫画阅读优化的专业转换工具</p>
+            </div>
+            <div class="header-decoration">
+                <div class="decoration-circle"></div>
+                <div class="decoration-circle"></div>
+                <div class="decoration-circle"></div>
+            </div>
+        </header>
+        
+        <!-- 文件上传区域 -->
+        <section class="upload-section">
+            <div class="section-header">
+                <h2><i class="fas fa-upload"></i> 上传漫画图片</h2>
+                <div class="section-tooltip">
+                    <i class="fas fa-question-circle"></i>
+                    <div class="tooltip-content">
+                        支持JPG, PNG, GIF, WEBP, BMP, TIFF, SVG, HEIC, HEIF, AVIF, JXL等格式
+                    </div>
+                </div>
+            </div>
+            
+            <div class="upload-area" id="upload-area">
+                <input type="file" id="image-upload" multiple accept="image/*,.heic,.heif,.avif,.jxl" />
+                <div class="upload-content">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>拖拽漫画图片到此处上传</h3>
+                    <p>或点击选择图片文件</p>
+                    <div class="upload-tips">
+                        <p><i class="fas fa-info-circle"></i> 支持所有常见图片格式</p>
+                        <p><i class="fas fa-lightbulb"></i> 建议使用有序文件名(如: 第01话_01.jpg, 第01话_02.jpg)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="upload-actions">
+                <button id="clear-all" class="btn-secondary">
+                    <i class="fas fa-trash-alt"></i> 清空所有
+                </button>
+                <button id="auto-sort" class="btn-secondary">
+                    <i class="fas fa-sort-alpha-down"></i> 智能排序
+                </button>
+                <button id="reverse-order" class="btn-secondary">
+                    <i class="fas fa-exchange-alt"></i> 反转顺序
+                </button>
+                <button id="add-more" class="btn-secondary">
+                    <i class="fas fa-plus"></i> 添加更多
+                </button>
+            </div>
+        </section>
+        
+        <!-- 图片预览和排序区域 -->
+        <section class="preview-section">
+            <div class="section-header">
+                <h2><i class="fas fa-images"></i> 图片预览与顺序管理</h2>
+                <div class="image-count">
+                    <span id="image-count">0</span> 张图片
+                </div>
+            </div>
+            
+            <div class="order-alert" id="order-alert" style="display: none;">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-content">
+                    <strong>图片顺序警告：</strong> 
+                    <span id="order-message"></span>
+                    <div class="alert-detail">检测到图片文件名顺序可能不正确，可能导致阅读顺序混乱</div>
+                </div>
+                <div class="order-alert-actions">
+                    <button id="fix-order" class="btn-small btn-primary">
+                        <i class="fas fa-magic"></i> 智能修正
+                    </button>
+                    <button id="ignore-order" class="btn-small btn-warning">
+                        <i class="fas fa-forward"></i> 忽略继续
+                    </button>
+                </div>
+            </div>
+            
+            <div class="section-controls">
+                <div class="sorting-tips">
+                    <i class="fas fa-info-circle"></i>
+                    <span>提示：拖拽图片可调整顺序，双击图片可放大查看</span>
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="grid">
+                        <i class="fas fa-th"></i> 网格视图
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <i class="fas fa-list"></i> 列表视图
+                    </button>
+                </div>
+            </div>
+            
+            <div class="image-preview-area" id="image-preview-area">
+                <!-- 上传的图片将动态添加到这里 -->
+                <div class="empty-state" id="empty-state">
+                    <i class="fas fa-image"></i>
+                    <p>尚未上传任何图片</p>
+                    <p class="empty-hint">上传图片后将在这里显示预览</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 设置区域 -->
+        <section class="settings-section">
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> PDF输出设置</h2>
+                <button id="reset-settings" class="btn-small btn-secondary">
+                    <i class="fas fa-undo"></i> 恢复默认
+                </button>
+            </div>
+            
+            <div class="settings-grid">
+                <div class="setting">
+                    <label for="page-size">
+                        <i class="fas fa-file"></i> 页面大小：
+                    </label>
+                    <select id="page-size">
+                        <option value="a4">A4 (210mm × 297mm)</option>
+                        <option value="letter">Letter (8.5in × 11in)</option>
+                        <option value="a3">A3 (297mm × 420mm)</option>
+                        <option value="a5">A5 (148mm × 210mm)</option>
+                        <option value="b5">B5 (176mm × 250mm)</option>
+                        <option value="comic" selected>漫画标准 (170mm × 260mm)</option>
+                    </select>
+                </div>
+                
+                <div class="setting">
+                    <label for="margin">
+                        <i class="fas fa-border-all"></i> 页边距：
+                    </label>
+                    <div class="range-container">
+                        <input type="range" id="margin-range" min="0" max="50" value="10" />
+                        <span class="range-value"><span id="margin-value">10</span> mm</span>
+                    </div>
+                </div>
+                
+                <div class="setting">
+                    <label for="orientation">
+                        <i class="fas fa-compress-alt"></i> 页面方向：
+                    </label>
+                    <select id="orientation">
+                        <option value="portrait">纵向</option>
+                        <option value="landscape">横向</option>
+                        <option value="auto" selected>自动(根据图片比例)</option>
+                    </select>
+                </div>
+                
+                <div class="setting">
+                    <label for="image-fit">
+                        <i class="fas fa-expand"></i> 图片适配：
+                    </label>
+                    <select id="image-fit">
+                        <option value="contain" selected>适应页面(保持比例)</option>
+                        <option value="cover">填充页面(裁剪边缘)</option>
+                        <option value="fill">拉伸填充(可能变形)</option>
+                        <option value="original">原始大小(居中显示)</option>
+                    </select>
+                </div>
+
+                <div class="setting">
+                    <label for="quality">
+                        <i class="fas fa-braille"></i> 输出质量：
+                    </label>
+                    <div class="range-container">
+                        <input type="range" id="quality-range" min="50" max="100" value="95" />
+                        <span class="range-value"><span id="quality-value">95</span>%</span>
+                    </div>
+                </div>
+
+                <div class="setting">
+                    <label for="filename">
+                        <i class="fas fa-font"></i> 输出文件名：
+                    </label>
+                    <input type="text" id="filename" value="漫画" placeholder="请输入文件名" />
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="generate-preview" class="btn-primary">
+                    <i class="fas fa-eye"></i> 生成预览
+                </button>
+                <button id="generate-pdf" class="btn-primary btn-success">
+                    <i class="fas fa-file-pdf"></i> 生成PDF
+                </button>
+            </div>
+        </section>
+        
+        <!-- PDF预览区域 -->
+        <section class="pdf-section" id="pdf-section" style="display: none;">
+            <div class="section-header">
+                <h2><i class="fas fa-file-pdf"></i> PDF预览</h2>
+                <button id="close-preview" class="btn-small">
+                    <i class="fas fa-times"></i> 关闭预览
+                </button>
+            </div>
+            <div class="pdf-preview" id="pdf-preview">
+                <!-- 预览内容将动态添加到这里 -->
+            </div>
+        </section>
+    </div>
+    
+    <!-- 图片查看模态框 -->
+    <div class="modal" id="image-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-filename">图片预览</h3>
+                <button id="close-modal" class="btn-small">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="预览图片" />
+                <div class="modal-navigation">
+                    <button id="prev-image" class="btn-secondary">
+                        <i class="fas fa-chevron-left"></i> 上一张
+                    </button>
+                    <span id="modal-index">1 / 1</span>
+                    <button id="next-image" class="btn-secondary">
+                        下一张 <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 进度条 -->
+    <div class="progress-container" id="progress-container" style="display: none;">
+        <div class="progress-content">
+            <div class="progress-icon">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <h3>正在生成PDF</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">处理中... 0%</div>
+            <p class="progress-detail" id="progress-detail">请稍候，正在处理您的图片...</p>
+            <button id="cancel-process" class="btn-small btn-warning">
+                <i class="fas fa-times"></i> 取消生成
+            </button>
+        </div>
+    </div>
+
+    <!-- 提示信息 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>青圣出品，必属精品 | 专为漫画爱好者打造</p>
+        <p class="footer-links">
+            <a href="javascript:void(0)" id="show-help">使用帮助</a>
+            <span>•</span>
+            <a href="javascript:void(0)" id="report-issue">反馈问题</a>
+        </p>
+    </footer>
+
+    <!-- 引入外部库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <!-- 引入自定义脚本 -->
+    <script src="main.js"></script>
+</body>
+</html>
